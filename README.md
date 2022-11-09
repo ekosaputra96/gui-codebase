@@ -1,1 +1,1 @@
-## GUI DEPO FRONT
+## GUI DEPO FRONT using Laravel, Adminlte, Laratrust
