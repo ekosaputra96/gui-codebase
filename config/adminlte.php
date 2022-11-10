@@ -301,18 +301,112 @@ return [
             'type' => 'sidebar-menu-search',
             'text' => 'search',
         ],
+
+        ['header' => 'MAIN NAVIGATION'],
+        
+        // setup
         [
-            'text' => 'blog',
-            'url'  => 'admin/blog',
-            'can'  => 'manage-blog',
+            'text'        => 'Setup',
+            'icon'        => 'fas fa-fw fa-wrench',
+            'permission'  => 'read-setup',
+            'submenu'     => [
+                [
+                    'text'  => 'No Transaksi Setup',
+                    'url'   => 'admin/transaksisetup',
+                    'icon'  => 'fas fa-fw fa-list-alt',
+                ],
+                [
+                    'text'  => 'Setup Biaya Umum',
+                    'url'   => 'admin/tarifumum',
+                    'icon'  => 'fas fa-fw fa-file-invoice',
+                ],
+                [
+                    'text'  => 'Signature',
+                    'url'   => 'admin/signature',
+                    'icon'  => 'fas fa-fw fa-file-signature',
+                ],
+            ]
         ],
+
+        // master data
         [
-            'text'        => 'pages',
-            'url'         => 'admin/pages',
-            'icon'        => 'far fa-fw fa-file',
-            'label'       => 4,
-            'label_color' => 'success',
+            'text'        => 'Master Data',
+            'icon'        => 'fas fa-fw fa-database',
+            'permission'  => 'read-masterdata',
+            'submenu'     => [
+                [
+                    'text'  => 'Customer',
+                    'url'   => 'admin/customer',
+                    'icon'  => 'fas fa-fw fa-users',
+                    'permission'  => 'read-customer',
+                ],
+                [
+                    'text'  => 'Kegiatan',
+                    'url'   => 'admin/kegiatan',
+                    'icon'  => 'fas fa-fw fa-file-invoice',
+                ],
+                [
+                    'text'  => 'Alat Berat',
+                    'url'   => 'admin/alat',
+                    'icon'  => 'fas fa-fw fa-tools',
+                ],
+                [
+                    'text'  => 'Jenis Harga Customer',
+                    'url'   => 'admin/jenisharga',
+                    'icon'  => 'fab fa-fw fa-sellsy',
+                ],
+                [
+                    'text'  => 'Operator',
+                    'url'   => 'admin/operator',
+                    'icon'  => 'fas fa-fw fa-user-tie',
+                ],
+                [
+                    'text'  => 'Size Container',
+                    'url'   => 'admin/sizecontainer',
+                    'icon'  => 'fas fa-fw fa-box',
+                ],
+                [
+                    'text'  => 'Vendor',
+                    'url'   => 'admin/vendor',
+                    'icon'  => 'fas fa-fw fa-store-alt',
+                    'permission' => 'read-vendor'
+                ],
+                [
+                    'text'  => 'Lokasi',
+                    'url'   => 'admin/masterlokasi',
+                    'icon'  => 'fas fa-fw fa-map-marked',
+                    'permission' => 'read-lokasi'
+                ],
+                [
+                    'text'  => 'Company',
+                    'url'   => 'admin/company',
+                    'icon'  => 'fas fa-fw fa-building',
+                    'permission' => 'read-company'
+                ],
+            ]
         ],
+
+        // transaction
+        [
+            'text'        => 'Transaksi',
+            'icon'        => 'fas fa-fw fa-handshake',
+            'permission'  => 'read-transaksi',
+            'submenu'     => [
+                [
+                    'text' => 'Job Order',
+                    'url'  => 'admin/joborder',
+                    'icon' => 'fas fa-fw fa-people-carry',
+                    'permission'  => 'read-jo',
+                ],
+                [
+                    'text' => 'Receive Delivery Request',
+                    'url'  => 'admin/rcdrequest',
+                    'icon' => 'fas fa-fw fa-truck',
+                    'permission'  => 'read-jo',
+                ],
+            ]
+        ],
+
         ['header' => 'account_settings'],
         [
             'text' => 'profile',
@@ -323,60 +417,6 @@ return [
             'text' => 'change_password',
             'url'  => 'admin/settings',
             'icon' => 'fas fa-fw fa-lock',
-        ],
-        [
-            'text'    => 'multilevel',
-            'icon'    => 'fas fa-fw fa-share',
-            'submenu' => [
-                [
-                    'text' => 'level_one',
-                    'url'  => '#',
-                ],
-                [
-                    'text'    => 'level_one',
-                    'url'     => '#',
-                    'submenu' => [
-                        [
-                            'text' => 'level_two',
-                            'url'  => '#',
-                        ],
-                        [
-                            'text'    => 'level_two',
-                            'url'     => '#',
-                            'submenu' => [
-                                [
-                                    'text' => 'level_three',
-                                    'url'  => '#',
-                                ],
-                                [
-                                    'text' => 'level_three',
-                                    'url'  => '#',
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-                [
-                    'text' => 'level_one',
-                    'url'  => '#',
-                ],
-            ],
-        ],
-        ['header' => 'labels'],
-        [
-            'text'       => 'important',
-            'icon_color' => 'red',
-            'url'        => '#',
-        ],
-        [
-            'text'       => 'warning',
-            'icon_color' => 'yellow',
-            'url'        => '#',
-        ],
-        [
-            'text'       => 'information',
-            'icon_color' => 'cyan',
-            'url'        => '#',
         ],
     ],
 
@@ -393,7 +433,8 @@ return [
     */
 
     'filters' => [
-        JeroenNoten\LaravelAdminLte\Menu\Filters\GateFilter::class,
+        // JeroenNoten\LaravelAdminLte\Menu\Filters\GateFilter::class,
+        MyApp\MyMenuFilter::class,
         JeroenNoten\LaravelAdminLte\Menu\Filters\HrefFilter::class,
         JeroenNoten\LaravelAdminLte\Menu\Filters\SearchFilter::class,
         JeroenNoten\LaravelAdminLte\Menu\Filters\ActiveFilter::class,
