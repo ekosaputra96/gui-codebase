@@ -2,10 +2,11 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Event;
 use Illuminate\Auth\Events\Registered;
+use JeroenNoten\LaravelAdminLte\Events\BuildingMenu;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -27,6 +28,16 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        // add users management to admilte sidebar menu
+        Event::listen(BuildingMenu::class, function (BuildingMenu $event) {
+            // Add some items to the menu...
+            if(auth()->user()->hasRole('superadministrator')){
+                $event->menu->addAfter('change_password', [
+                    'text'  => 'Users Management',
+                    'icon'  => 'fas fa-fw fa-users-cog',
+                    'url'   => 'laratrust'
+                ]);
+            }
+        });
     }
 }

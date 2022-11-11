@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "155c5d844c5ce532a9ca073927b0b515",
+    "content-hash": "7ecfc5cbd1ca80d107ef45216ebeedf1",
     "packages": [
         {
             "name": "almasaeed2010/adminlte",
@@ -5709,6 +5709,79 @@
                 "source": "https://github.com/webmozarts/assert/tree/1.11.0"
             },
             "time": "2022-06-03T18:03:27+00:00"
+        },
+        {
+            "name": "yajra/laravel-auditable",
+            "version": "v4.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/yajra/laravel-auditable.git",
+                "reference": "987b3e95246747b106dbb70d0ebc723741eb7f8f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/yajra/laravel-auditable/zipball/987b3e95246747b106dbb70d0ebc723741eb7f8f",
+                "reference": "987b3e95246747b106dbb70d0ebc723741eb7f8f",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/database": "^6|^7|^8|^9",
+                "illuminate/support": "^6|^7|^8|^9",
+                "php": ">=7.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^7.5|^8.4|^9.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.0-dev"
+                },
+                "laravel": {
+                    "providers": [
+                        "Yajra\\Auditable\\AuditableServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Yajra\\Auditable\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Arjay Angeles",
+                    "email": "aqangeles@gmail.com",
+                    "homepage": "http://yajrabox.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A simple Laravel user auditing package for Eloquent Model.",
+            "homepage": "https://github.com/yajra/laravel-auditable",
+            "keywords": [
+                "Auditable",
+                "laravel",
+                "yajra"
+            ],
+            "support": {
+                "issues": "https://github.com/yajra/laravel-auditable/issues",
+                "source": "https://github.com/yajra/laravel-auditable/tree/v4.4.0"
+            },
+            "funding": [
+                {
+                    "url": "https://www.paypal.me/yajra",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://www.patreon.com/yajra",
+                    "type": "patreon"
+                }
+            ],
+            "time": "2022-02-09T02:20:46+00:00"
         }
     ],
     "packages-dev": [
