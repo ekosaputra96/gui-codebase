@@ -3,10 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Company;
+use App\Models\MasterLokasi;
 use Illuminate\Http\Request;
 
 class SettingsController extends Controller
 {
+    /**
+     * Display new password form of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function message(bool $success, string $title, string $message){
+        return [
+            'success' => $success,
+            'title' => $title,
+            'message' => $message
+        ];
+    }
+
     /**
      * Display new password form of the resource.
      *
@@ -24,8 +39,17 @@ class SettingsController extends Controller
      */
     public function index()
     {
-        //
-        return view('admin.settings.profile');
+        // getting companies
+        $companies = [];
+
+        foreach(Company::select('kode_company', 'nama_company')->get() as $item){
+            $companies[$item->kode_company] = $item->kode_company .' '.$item->nama_company;
+        }
+
+        // getting locations
+        $locations = MasterLokasi::pluck('nama_lokasi', 'kode_lokasi')->toArray();
+
+        return view('admin.settings.profile', compact('companies', 'locations'));
     }
 
     /**
@@ -69,7 +93,7 @@ class SettingsController extends Controller
     public function edit($id)
     {
         // getting user information from User table
-        $user = User::select('name', 'username', 'kode_lokasi', 'email', 'kode_company')->find($id);
+        $user = User::select('id', 'name', 'username', 'kode_lokasi', 'email', 'kode_company')->find($id);
 
         // if user is null
         if(!$user){
@@ -87,7 +111,27 @@ class SettingsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        // init message
+        $message = [];
+
+        // getting user by id and update
+        try {
+            $user = User::find($id)->update([
+                'name' => $request->name_edit,
+                'username' => $request->username_edit,
+                'email' => $request->email_edit,
+                'kode_company' => $request->kode_company_edit,
+                'kode_lokasi' => $request->kode_lokasi_edit,
+            ]);
+            if($user){
+                $message = $this->message(true, 'Update', 'Data '.$request->username_edit. ' telah diupdate');
+            }else{
+                $message = $this->message(false, 'Gagal', 'Data '.$request->username_edit. ' gagal diupdate');
+            }
+        } catch (\Throwable $th) {
+            $message = $this->message(false, 'Gagal', $th->getMessage());
+        }
+        return response()->json($message);
     }
 
     /**

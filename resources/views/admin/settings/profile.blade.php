@@ -3,7 +3,7 @@
 @section('title', 'Profile | Settings')
 
 @section('content_header')
-    <h1 class="m-0 text-dark">Profile : {{ auth()->user()->username }}</h1>
+    <h1 class="m-0 text-dark">Profile : <span id="username"></span></h1>
 @stop
 
 {{-- enabling select2 --}}
@@ -20,42 +20,51 @@
                         <div class="row">
                             {{-- fullname --}}
                             <div class="col-md-6">
-                                <x-adminlte-input name="name_edit" type="text" label="Fullname :"
+                                <x-adminlte-input name="name_edit" type="text" label="Fullname :" class="edit-mode"
                                     placeholder="Enter Fullname..." readonly />
                             </div>
 
                             {{-- username --}}
                             <div class="col-md-6">
-                                <x-adminlte-input name="username_edit" type="text" label="Username :"
+                                <x-adminlte-input name="username_edit" type="text" label="Username :" class="edit-mode"
                                     placeholder="Enter Username..." readonly />
                             </div>
 
                             {{-- email --}}
                             <div class="col-md-12">
-                                <x-adminlte-input name="email_edit" type="email" label="Email :"
+                                <x-adminlte-input name="email_edit" type="email" label="Email :" class="edit-mode"
                                     placeholder="Enter Email..." readonly />
                             </div>
 
                             {{-- Company --}}
                             <div class="col-md-6">
                                 <x-adminlte-select2 name="kode_company_edit" data-placeholder="Select a company..."
-                                    label="Company :" readonly>
-                                    <x-adminlte-options :options="['Option 1', 'Option 2', 'Option 3']" placeholder="" />
+                                    class="edit-mode" label="Company :" readonly>
+                                    <x-adminlte-options :options="$companies" placeholder="" />
                                 </x-adminlte-select2>
                             </div>
 
                             {{-- Lokasi --}}
                             <div class="col-md-6">
                                 <x-adminlte-select2 name="kode_lokasi_edit" data-placeholder="Select a location..."
-                                    label="Lokasi :" readonly>
-                                    <x-adminlte-options :options="['Option 1', 'Option 2', 'Option 3']" placeholder="" />
+                                    class="edit-mode" label="Lokasi :" readonly>
+                                    <x-adminlte-options :options="$locations" placeholder="" />
                                 </x-adminlte-select2>
                             </div>
 
-                            {{-- submit button --}}
                             <div class="col-md-12">
-                                <x-adminlte-button class="btn-flat float-right" label="Edit" theme="success"
-                                    icon="fas fa-user-edit" id="edit-user-button" />
+                                <div class="float-right">
+                                    {{-- edit button --}}
+                                    <x-adminlte-button class="btn-flat read-mode-button" label="Edit" theme="info"
+                                        icon="fas fa-user-edit" id="edit-user-button" />
+
+                                    <x-adminlte-button class="btn-flat edit-mode-button" label="Update" theme="success"
+                                        icon="fas fa-recycle" id="submit-user-button" />
+
+                                    {{-- cancel button --}}
+                                    <x-adminlte-button class="btn-flat edit-mode-button" label="Cancel" theme="danger"
+                                        icon="fas fa-undo-alt" id="cancel-user-button" />
+                                </div>
                             </div>
                         </div>
                     </form>
@@ -79,9 +88,62 @@
             refreshData();
 
             // edit-user-button
-            $('#edit-user-button').click(function(e) {
-                e.preventDefault();
+            $('#edit-user-button').click(function() {
+                $(this).hide();
+                $('.edit-mode-button').show();
+                $('.edit-mode').removeAttr('readonly');
+            })
+
+            // cancel user button
+            $('#cancel-user-button').click(function() {
+                refreshData();
+            })
+
+            // submit user button
+            $('#submit-user-button').click(function() {
+                const id = '{{ auth()->user()->id }}';
                 const data = $('#edit-user').serialize();
+                // Swal.fire({
+                //     title: 'Loading..',
+                //     text: "Please wait for a moment !",
+                //     icon: 'warning',
+                //     showConfirmButton: false
+                // })
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Loading..',
+                    text: "Please wait for a moment !",
+                    showConfirmButton: false,
+                });
+                $.ajax({
+                    url: '{{ route('settings.index') }}/' + id,
+                    type: 'PUT',
+                    data: data,
+                    success: function(data) {
+                        // notif
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: data.title,
+                                text: data.message
+                            })
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: data.title,
+                                text: data.message
+                            })
+                        }
+                        refreshData();
+                    },
+                    error: function(data) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Something Wrong !'
+                        })
+                    }
+                })
             })
         })
 
@@ -95,10 +157,14 @@
                 type: 'GET',
                 success: function(data) {
                     $('#name_edit').val(data.name);
+                    $('#username').html(data.username);
                     $('#username_edit').val(data.username);
                     $('#email_edit').val(data.email);
-                    $('#kode_company_edit').val(data.kode_company);
-                    $('#kode_lokasi_edit').val(data.kode_lokasi);
+                    $('#kode_company_edit').val(data.kode_company).trigger('change');
+                    $('#kode_lokasi_edit').val(data.kode_lokasi).trigger('change');
+                    $('.edit-mode').attr('readonly', true);
+                    $('.edit-mode-button').hide();
+                    $('.read-mode-button').show();
                 }
             })
         }

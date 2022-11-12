@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Company;
+use App\Models\MasterLokasi;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Laratrust\Traits\LaratrustUserTrait;
@@ -23,8 +24,10 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'username',
         'password',
-        'kode_company'
+        'kode_company',
+        'kode_lokasi'
     ];
 
     /**
@@ -54,12 +57,12 @@ class User extends Authenticatable
 
     public function adminlte_desc()
     {
-        return auth()->user()->kode_lokasi;
+        return Company::select('nama_company')->where('kode_company', auth()->user()->kode_company)->first()->nama_company . ' ('.MasterLokasi::select('nama_lokasi')->where('kode_lokasi', auth()->user()->kode_lokasi)->first()->nama_lokasi.')';
     }
 
     public function adminlte_profile_url()
     {
-        return 'profile/username';
+        return 'admin/settings';
     }
 
     public function company(){
