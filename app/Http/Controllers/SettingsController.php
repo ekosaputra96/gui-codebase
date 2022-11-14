@@ -6,20 +6,109 @@ use App\Models\User;
 use App\Models\Company;
 use App\Models\MasterLokasi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class SettingsController extends Controller
 {
+    /**
+     * checking the username is available or not from User table.
+     *
+     * @return locations
+     */
+    public function username($username){
+        return response()->json(User::select('username')->where('username', $username)->count());
+    }
+    
+    /**
+     * getting locations lists from MasterLokasi table.
+     *
+     * @return locations
+     */
+    public function getLocations()
+    {
+        return MasterLokasi::pluck('nama_lokasi', 'kode_lokasi')->toArray();
+    }
+
+    /**
+     * getting companies lists from Company table.
+     *
+     * @return companies
+     */
+    public function getcompanies()
+    {
+        // getting companies
+        $companies = [];
+
+        foreach (Company::select('kode_company', 'nama_company')->get() as $item) {
+            $companies[$item->kode_company] = $item->kode_company . ' - ' . $item->nama_company;
+        }
+
+        return $companies;
+    }
+
     /**
      * Display new password form of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function message(bool $success, string $title, string $message){
+    public function message(bool $success, string $title, string $message)
+    {
         return [
             'success' => $success,
             'title' => $title,
-            'message' => $message
+            'message' => $message,
         ];
+    }
+
+    /**
+     * validating and generating password, return valid/invalid.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function manageUsers()
+    {
+        if (
+            auth()
+                ->user()
+                ->hasRole('superadministrator')
+        ) {
+            // getting companies
+            $companies = $this->getCompanies();
+
+            // getting locations
+            $locations = $this->getLocations();
+            return view('admin.settings.manageusers', compact('companies', 'locations'));
+        }
+        return abort('401');
+    }
+
+    /**
+     * validating and generating password, return valid/invalid.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function generateNewPassword(Request $request)
+    {
+        // validate user input
+        $formFields = $request->validate([
+            'old_password' => ['required', 'min:8'],
+            'password' => 'required|confirmed|min:8',
+        ]);
+
+        // getting logged in user information from database
+        $user = User::select('id', 'password')->find(auth()->id());
+
+        // check old password and userpassword
+        if (Hash::check($formFields['old_password'], $user['password'])) {
+            $user->update([
+                'password' => Hash::make($formFields['password']),
+            ]);
+            return redirect(route('settings.index') . '/newpassword')->with('message', 'Your password has been changed successfullly !');
+        }
+
+        return back()
+            ->withErrors(['old_password' => 'Invalid Old Password'])
+            ->onlyInput('old_password');
     }
 
     /**
@@ -28,7 +117,8 @@ class SettingsController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function newPassword(){
+    public function newPassword()
+    {
         return view('admin.settings.newpassword');
     }
 
@@ -40,14 +130,10 @@ class SettingsController extends Controller
     public function index()
     {
         // getting companies
-        $companies = [];
-
-        foreach(Company::select('kode_company', 'nama_company')->get() as $item){
-            $companies[$item->kode_company] = $item->kode_company .' '.$item->nama_company;
-        }
+        $companies = $this->getCompanies();
 
         // getting locations
-        $locations = MasterLokasi::pluck('nama_lokasi', 'kode_lokasi')->toArray();
+        $locations = $this->getLocations();
 
         return view('admin.settings.profile', compact('companies', 'locations'));
     }
@@ -71,6 +157,7 @@ class SettingsController extends Controller
     public function store(Request $request)
     {
         //
+        return response()->json($request->all());
     }
 
     /**
@@ -96,7 +183,7 @@ class SettingsController extends Controller
         $user = User::select('id', 'name', 'username', 'kode_lokasi', 'email', 'kode_company')->find($id);
 
         // if user is null
-        if(!$user){
+        if (!$user) {
             return abort(404, 'Not Found User');
         }
         return response()->json($user);
@@ -123,10 +210,10 @@ class SettingsController extends Controller
                 'kode_company' => $request->kode_company_edit,
                 'kode_lokasi' => $request->kode_lokasi_edit,
             ]);
-            if($user){
-                $message = $this->message(true, 'Update', 'Data '.$request->username_edit. ' telah diupdate');
-            }else{
-                $message = $this->message(false, 'Gagal', 'Data '.$request->username_edit. ' gagal diupdate');
+            if ($user) {
+                $message = $this->message(true, 'Update', 'Data ' . $request->username_edit . ' telah diupdate');
+            } else {
+                $message = $this->message(false, 'Gagal', 'Data ' . $request->username_edit . ' gagal diupdate');
             }
         } catch (\Throwable $th) {
             $message = $this->message(false, 'Gagal', $th->getMessage());

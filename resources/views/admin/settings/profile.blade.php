@@ -3,7 +3,7 @@
 @section('title', 'Profile | Settings')
 
 @section('content_header')
-    <h1 class="m-0 text-dark">Profile : <span id="username"></span></h1>
+    <h4 class="m-0 text-dark">Profile : <span id="username"></span></h4>
 @stop
 
 {{-- enabling select2 --}}
@@ -103,12 +103,6 @@
             $('#submit-user-button').click(function() {
                 const id = '{{ auth()->user()->id }}';
                 const data = $('#edit-user').serialize();
-                // Swal.fire({
-                //     title: 'Loading..',
-                //     text: "Please wait for a moment !",
-                //     icon: 'warning',
-                //     showConfirmButton: false
-                // })
                 Swal.fire({
                     icon: 'warning',
                     title: 'Loading..',

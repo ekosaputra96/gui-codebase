@@ -35,7 +35,7 @@ class EventServiceProvider extends ServiceProvider
                 $event->menu->addAfter('change_password', [
                     'text'  => 'Users Management',
                     'icon'  => 'fas fa-fw fa-users-cog',
-                    'url'   => 'laratrust'
+                    'url'   => 'admin/settings/manageusers'
                 ]);
             }
         });
