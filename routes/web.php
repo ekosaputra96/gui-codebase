@@ -29,6 +29,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('settings/newpassword', [SettingsController::class, 'newPassword']);
     Route::get('settings/manageusers', [SettingsController::class, 'manageUsers']);
     Route::get('settings/username/{username}', [SettingsController::class, 'username']);
+    Route::get('settings/getusers', [SettingsController::class, 'getUsers']);
     Route::post('settings/generatenewpassword', [SettingsController::class, 'generateNewPassword']);
     Route::resource('settings', SettingsController::class);
 });

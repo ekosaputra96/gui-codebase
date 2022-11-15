@@ -4,12 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Company;
+use Illuminate\Support\Str;
 use App\Models\MasterLokasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Yajra\Datatables\Datatables;
 
 class SettingsController extends Controller
 {
+    /**
+     * getting all users from User table to dataTable.
+     *
+     * @return all users
+     */
+    public function getUsers(){
+        return Datatables::of(User::orderBy('created_at'))->make(true);
+    }
+
+
     /**
      * checking the username is available or not from User table.
      *
@@ -129,10 +141,10 @@ class SettingsController extends Controller
      */
     public function index()
     {
-        // getting companies
+        // getting companies for company input
         $companies = $this->getCompanies();
 
-        // getting locations
+        // getting locations for locations input
         $locations = $this->getLocations();
 
         return view('admin.settings.profile', compact('companies', 'locations'));
@@ -156,8 +168,33 @@ class SettingsController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        return response()->json($request->all());
+        // check if the username is available 
+        if(User::select('username')->where('username', $request->username)->count() >= 1){
+            return response()->json($this->message(false, 'Error', 'The username is already taken !'));
+        }
+
+        // check if the password and password confirmation matches
+        if($request->password !== $request->password_confirmation){
+            return response()->json($this->message(false, 'Error', 'The password does not match !'));
+        }
+
+        // set remember token
+        $request['remember_token'] = Str::random(60);
+
+        try {
+            User::create([
+                'name' => $request->name,
+                'username' => $request->username,
+                'kode_lokasi' => $request->kode_lokasi,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'remember_token' => $request->remember_token,
+                'kode_company' => $request->kode_company
+            ]);
+            return response()->json($this->message(true, 'Created', 'The user has been added successfully'));
+        } catch (\Throwable $th) {
+            return response()->json($this->message(false, 'Failed', $th->getMessage()));
+        }
     }
 
     /**
@@ -168,7 +205,18 @@ class SettingsController extends Controller
      */
     public function show($id)
     {
-        //
+        // check if the current logged in user has superadministrator role
+        if(!auth()->user()->hasRole('superadministrator')) {
+            return abort('401');
+        }
+
+        // getting companies for company input
+        $companies = $this->getCompanies();
+
+        // getting locations for locations input
+        $locations = $this->getLocations();
+
+        return view('admin.settings.userdetail', compact('companies', 'locations', 'id'));
     }
 
     /**
@@ -182,10 +230,15 @@ class SettingsController extends Controller
         // getting user information from User table
         $user = User::select('id', 'name', 'username', 'kode_lokasi', 'email', 'kode_company')->find($id);
 
+        
         // if user is null
         if (!$user) {
             return abort(404, 'Not Found User');
         }
+
+        // getting user roles
+        $user['roles'] = $user->getRoles();
+
         return response()->json($user);
     }
 
@@ -205,7 +258,6 @@ class SettingsController extends Controller
         try {
             $user = User::find($id)->update([
                 'name' => $request->name_edit,
-                'username' => $request->username_edit,
                 'email' => $request->email_edit,
                 'kode_company' => $request->kode_company_edit,
                 'kode_lokasi' => $request->kode_lokasi_edit,
@@ -229,6 +281,19 @@ class SettingsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try {
+            // getting user by id
+            $user = User::find($id);
+            if(!$user){
+                return abort('404');
+            }
+
+            $user->delete();
+
+            return response()->json($this->message(true, 'Deleted', $user->username . ' has been deleted'));
+        } catch (\Throwable $th) {
+            //throw $th;
+            return response()->json($this->message(false, 'Failed', $th->getMessage()));
+        }
     }
 }

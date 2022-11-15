@@ -35,6 +35,7 @@ class EventServiceProvider extends ServiceProvider
                 $event->menu->addAfter('change_password', [
                     'text'  => 'Users Management',
                     'icon'  => 'fas fa-fw fa-users-cog',
+                    'active' => ['regex:@^admin/settings/[0-9]+$@'],
                     'url'   => 'admin/settings/manageusers'
                 ]);
             }

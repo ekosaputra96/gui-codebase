@@ -5,7 +5,7 @@
 @section('content_header')
     <div class="row">
         <div class="col-md-6">
-            <h5 class="m-0 text-dark">Profile : <span id="username"></span></h5>
+            <h5 class="m-0 text-dark">User Detail : <span id="username"></span></h5>
         </div>
         <div class="col-md-6">
             <h5 class="m-0 text-dark">Role : <span id="roles"></span></h5>
@@ -21,6 +21,22 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
+                    {{-- header content --}}
+                    <div class="header-content">
+                        {{-- back button --}}
+                        <a href="{{ route('settings.index') }}/manageusers">
+                            <x-adminlte-button label="Back" theme="primary" icon="fas fa-arrow-left" class="btn-xs"
+                                id="back-button" />
+                        </a>
+
+                        {{-- managing users/laratrust --}}
+                        <a href="{{ url('/laratrust') }}" target="_blank">
+                            <x-adminlte-button label="Manage Users" theme="success" icon="fas fa-users-cog"
+                                class="btn-xs float-right" />
+                        </a>
+                    </div>
+                    <hr>
+
                     {{-- form for editing logged in user --}}
                     <form action="#" id="edit-user">
                         @csrf
@@ -65,8 +81,13 @@
                                     <x-adminlte-button class="btn-flat read-mode-button" label="Edit" theme="info"
                                         icon="fas fa-user-edit" id="edit-user-button" />
 
-                                    <x-adminlte-button type="submit" class="btn-flat edit-mode-button" label="Update" theme="success"
-                                        icon="fas fa-recycle" id="submit-user-button" />
+                                    {{-- delete button --}}
+                                    <x-adminlte-button class="btn-flat read-mode-button" label="Delete" theme="danger"
+                                        icon="fas fa-trash-alt" id="delete-user-button" />
+
+                                    {{-- submit button --}}
+                                    <x-adminlte-button type="submit" class="btn-flat edit-mode-button" label="Update"
+                                        theme="success" icon="fas fa-recycle" id="submit-user-button" />
 
                                     {{-- cancel button --}}
                                     <x-adminlte-button class="btn-flat edit-mode-button" label="Cancel" theme="danger"
@@ -96,7 +117,7 @@
 
             // edit-user-button
             $('#edit-user-button').click(function() {
-                $(this).hide();
+                $('.read-mode-button').hide();
                 $('.edit-mode-button').show();
                 $('.edit-mode').removeAttr('readonly');
             })
@@ -106,10 +127,49 @@
                 refreshData();
             })
 
+            // delete user button
+            $('#delete-user-button').click(function() {
+                const id = '{{ $id }}';
+                Swal.fire({
+                    icon: 'warning',
+                    text: 'Are you sure to delete this user ?',
+                    showCancelButton: true,
+                    reverseButtons: true,
+                    confirmButtonText: 'Yes, delete it',
+                    cancelButtonText: 'Cancel'
+                }).then(function(e) {
+                    if (e.value === true) {
+                        $.ajax({
+                            url: '{{ route('settings.index') }}/' + id,
+                            type: 'DELETE',
+                            success: function(data) {
+                                if (data.success) {
+                                    return Swal.fire({
+                                        icon: 'success',
+                                        title: data.title,
+                                        text: data.message
+                                    }).then(function() {
+                                        $(location).attr('href',
+                                            '{{ route('settings.index') }}/manageusers'
+                                        )
+                                    })
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: typeof data.title === 'undefined' ? 'Error' : data.title,
+                                        text: typeof data.title === 'undefined' ? 'Something Wrong !' : data.message
+                                    })
+                                }
+                            },
+                        })
+                    }
+                })
+            })
+
             // submit user button
             $('#edit-user').on('submit', function(e) {
-                e.preventDefault();
-                const id = '{{ auth()->user()->id }}';
+                e.preventDefault()
+                const id = '{{ $id }}';
                 const data = $(this).serialize();
                 Swal.fire({
                     icon: 'warning',
@@ -151,7 +211,7 @@
 
         // refresh data
         function refreshData() {
-            const id = '{{ auth()->user()->id }}'
+            const id = '{{ $id }}'
 
             // request user information
             $.ajax({
@@ -160,18 +220,18 @@
                 success: function(data) {
                     // set roles for the current user
                     let roles = '';
-                    if(data.roles.length === 0){
+                    if (data.roles.length === 0) {
                         roles = '-'
-                    }else{
+                    } else {
                         $.each(data.roles, function(index, value) {
-                            if(index == 0){
+                            if (index == 0) {
                                 roles += value;
-                            }else{
+                            } else {
                                 roles += ', ' + value;
                             }
                         })
                     }
-                    $('#roles').html('<span>'+ roles +'</span>')
+                    $('#roles').html('<span>' + roles + '</span>')
                     $('#name_edit').val(data.name);
                     $('#username').html(data.username);
                     $('#username_edit').val(data.username);
@@ -181,6 +241,15 @@
                     $('.edit-mode').attr('readonly', true);
                     $('.edit-mode-button').hide();
                     $('.read-mode-button').show();
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Not Found',
+                        text: 'The user is not found !'
+                    }).then(function() {
+                        $(location).attr('href', '{{route('settings.index')}}/manageusers');
+                    })
                 }
             })
         }

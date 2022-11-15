@@ -5,11 +5,14 @@
 @section('title', 'Users Managements | Settings')
 
 @section('content_header')
-    <h4 class="m-0 text-dark">Users Management</h4>
+    <h5 class="m-0 text-dark">Users Management</h5>
 @stop
 
 {{-- enabling select2 --}}
 @section('plugins.Select2', true)
+
+{{-- enabling Datatables --}}
+@section('plugins.Datatables', true)
 
 @section('content')
     <div class="row">
@@ -23,7 +26,7 @@
                             id="new-user-button" />
 
                         {{-- back button --}}
-                        <x-adminlte-button label="Back" theme="warning" icon="fas fa-arrow-left" class="btn-xs"
+                        <x-adminlte-button label="Back" theme="primary" icon="fas fa-arrow-left" class="btn-xs"
                             id="back-button" />
 
                         {{-- managing users/laratrust --}}
@@ -35,9 +38,9 @@
 
                     {{-- body content --}}
                     <div class="body-content">
-                        <hr>
                         {{-- form for editing logged in user --}}
                         <form action="{{ url('/') }}" id="add-user-form">
+                            <hr>
                             @csrf
                             <div class="row">
                                 {{-- fullname --}}
@@ -111,6 +114,24 @@
                             </div>
                         </form>
                     </div>
+
+                    {{-- table content --}}
+                    <div class="table-content">
+                        <hr>
+                        <table class="table table-striped table-hover" id="data-table" style="font-size: 14px;"
+                            width="100%">
+                            <thead class="thead-light">
+                                <tr>
+                                    <td>id</td>
+                                    <th scope="col">Username</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Kode Company</th>
+                                    <th scope="col">Kode Lokasi</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -128,7 +149,7 @@
         });
 
         $(document).ready(function() {
-            resetData(false, false);
+            resetData(false, false, true);
 
             // submitting add-user-form
             $("#add-user-form").on('submit', function(e) {
@@ -150,13 +171,35 @@
                         text: "The username is already taken !"
                     })
                 }
+                // loading notification
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Loading..',
+                    text: "Please wait for a moment !",
+                    showConfirmButton: false,
+                });
+
+                // set data from the add-user-form
                 const data = $(this).serialize();
                 $.ajax({
-                    url: '{{route('settings.index')}}',
+                    url: '{{ route('settings.index') }}',
                     type: 'POST',
                     data: data,
                     success: function(data) {
-                        console.log('data from server : ', data);
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: data.title,
+                                text: data.message
+                            })
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: data.title,
+                                text: data.message
+                            })
+                        }
+                        resetData(false, false, true);
                     }
                 })
             });
@@ -175,7 +218,7 @@
         $('#back-button').click(function() {
             $('#add-user-form').hide();
             $('#new-user-button').show()
-            resetData(false, false);
+            resetData(false, false, true);
         })
 
         // reset button
@@ -186,12 +229,6 @@
         // username validation
         $('#username').change(function(e) {
             const username = e.target.value;
-            // if username length is 0, remove all class and its feedback
-            if (username.length === 0) {
-                $('#username').removeClass('is-valid')
-                $('#username').removeClass('is-invalid')
-                $('.username-feedback').hide();
-            }
             $.ajax({
                 url: '{{ route('settings.index') }}/' + 'username/' + username,
                 type: 'GET',
@@ -201,17 +238,21 @@
                         $('#username').removeClass('is-valid')
                         $('#username').addClass('is-invalid')
                         $('.username-feedback').show();
-                    } else {
+                    } else if (data == 0 && username.length != 0) {
                         // if username is available
                         $('#username').removeClass('is-invalid')
                         $('#username').addClass('is-valid')
+                        $('.username-feedback').hide();
+                    } else {
+                        $('#username').removeClass('is-valid')
+                        $('#username').removeClass('is-invalid')
                         $('.username-feedback').hide();
                     }
                 }
             })
         })
 
-        // password confirmation
+        // password
         $('#password').change(function(e) {
             const password = e.target.value;
             // if password confirmation length is 0, remove all class and its feedback
@@ -256,7 +297,7 @@
         })
 
         // reset data
-        function resetData(backbutton = false, addform = true) {
+        function resetData(backbutton = false, addform = true, adduserbtn = false) {
             // hide add-user form
             if (addform) {
                 $('#add-user-form').show();
@@ -269,6 +310,13 @@
                 $('#back-button').show();
             } else {
                 $('#back-button').hide();
+            }
+
+            // show / hide add user button
+            if (adduserbtn) {
+                $('#new-user-button').show();
+            } else {
+                $('#new-user-button').hide();
             }
             $('#username').removeClass('is-valid')
             $('#username').removeClass('is-invalid')
@@ -287,5 +335,39 @@
             $('#kode_company').val('').trigger('change');
             $('#kode_lokasi').val('').trigger('change');
         }
+
+        // getting users from server
+        $(function() {
+            $('#data-table').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: '{{ route('settings.index') }}/getusers',
+                columns: [{
+                        data: 'id',
+                        visible: false,
+                    },
+                    {
+                        data: 'username',
+                        "fnCreatedCell": function(nTd, sData, oData, iRow, iCol) {
+                            $(nTd).html("<a href='{{ route('settings.index') }}/" + oData
+                                .id + "'>" + oData
+                                .username + "</a>");
+                        }
+                    },
+                    {
+                        data: 'name',
+                    },
+                    {
+                        data: 'email',
+                    },
+                    {
+                        data: 'kode_company',
+                    },
+                    {
+                        data: 'kode_lokasi',
+                    },
+                ]
+            })
+        })
     </script>
 @endpush

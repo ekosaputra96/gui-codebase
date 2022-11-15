@@ -27,7 +27,8 @@ class User extends Authenticatable
         'username',
         'password',
         'kode_company',
-        'kode_lokasi'
+        'kode_lokasi',
+        'remember_token'
     ];
 
     /**

@@ -3,7 +3,7 @@
 @section('title', 'Profile | Settings')
 
 @section('content_header')
-    <h4 class="m-0 text-dark">Change Password : {{auth()->user()->username}}</h4>
+    <h5 class="m-0 text-dark">Change Password : {{auth()->user()->username}}</h5>
 @stop
 
 @section('content')

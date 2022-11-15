@@ -14,7 +14,8 @@
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.4",
         "santigarcor/laratrust": "^7.1",
-        "yajra/laravel-auditable": "^4.4"
+        "yajra/laravel-auditable": "^4.4",
+        "yajra/laravel-datatables-oracle": "^9.21"
     },
     "require-dev": {
         "facade/ignition": "^2.5",
