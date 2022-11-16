@@ -29,6 +29,10 @@
                         <x-adminlte-button label="Back" theme="primary" icon="fas fa-arrow-left" class="btn-xs"
                             id="back-button" />
 
+                        {{-- back button --}}
+                        <x-adminlte-button label="Refresh" theme="secondary" icon="fas fa-sync-alt" class="btn-xs"
+                            id="refresh-button" />
+
                         {{-- managing users/laratrust --}}
                         <a href="{{ url('/laratrust') }}" target="_blank">
                             <x-adminlte-button label="Manage Users" theme="success" icon="fas fa-users-cog"
@@ -199,7 +203,11 @@
                                 text: data.message
                             })
                         }
+                        // reset all buttons and form become read-mode
                         resetData(false, false, true);
+
+                        // refresh datatable
+                        refreshTable(false);
                     }
                 })
             });
@@ -224,6 +232,11 @@
         // reset button
         $('#reset-user-button').click(function() {
             resetData(true)
+        })
+
+        // refresh button
+        $('#refresh-button').click(function() {
+            refreshTable(true);
         })
 
         // username validation
@@ -369,5 +382,17 @@
                 ]
             })
         })
+
+        // reload the datatables
+        function refreshTable(notif = true) {
+            $('#data-table').DataTable().ajax.reload(null, false);
+            if (notif) {
+                $.notify('Data is upto-date', {
+                    globalPosition: 'top center',
+                    autoHideDelay: 1500,
+                    className: 'info',
+                });
+            }
+        }
     </script>
 @endpush
