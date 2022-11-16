@@ -288,6 +288,11 @@ class SettingsController extends Controller
                 return abort('404');
             }
 
+            // check if user has roles
+            if(count($user->getRoles()) >= 1){
+                return response()->json($this->message(false, 'Failed', $user->username. ' has roles'));
+            }
+
             $user->delete();
 
             return response()->json($this->message(true, 'Deleted', $user->username . ' has been deleted'));

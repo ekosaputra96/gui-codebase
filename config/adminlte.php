@@ -311,6 +311,18 @@ return [
             'permission'  => 'read-setup',
             'submenu'     => [
                 [
+                    'text'  => 'Company',
+                    'url'   => 'admin/company',
+                    'icon'  => 'fas fa-fw fa-building',
+                    'permission' => 'read-company'
+                ],
+                [
+                    'text'  => 'Lokasi',
+                    'url'   => 'admin/masterlokasi',
+                    'icon'  => 'fas fa-fw fa-map-marked',
+                    'permission' => 'read-lokasi'
+                ],
+                [
                     'text'  => 'No Transaksi Setup',
                     'url'   => 'admin/transaksisetup',
                     'icon'  => 'fas fa-fw fa-list-alt',
@@ -370,18 +382,6 @@ return [
                     'url'   => 'admin/vendor',
                     'icon'  => 'fas fa-fw fa-store-alt',
                     'permission' => 'read-vendor'
-                ],
-                [
-                    'text'  => 'Lokasi',
-                    'url'   => 'admin/masterlokasi',
-                    'icon'  => 'fas fa-fw fa-map-marked',
-                    'permission' => 'read-lokasi'
-                ],
-                [
-                    'text'  => 'Company',
-                    'url'   => 'admin/company',
-                    'icon'  => 'fas fa-fw fa-building',
-                    'permission' => 'read-company'
                 ],
             ]
         ],
